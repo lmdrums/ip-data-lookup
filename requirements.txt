@@ -1,3 +1,4 @@
 requests==2.32.3
 customtkinter==5.2.2
 pillow==10.3.0
+tkintermapview==1.29

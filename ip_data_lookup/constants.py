@@ -65,6 +65,6 @@ BANNER_IMAGE_DARK = os.path.join(IMAGES_PATH, "banner_dark.png")
 FIND_IMAGE = {"light": os.path.join(IMAGES_PATH, "find.png"),
                        "dark": os.path.join(IMAGES_PATH, "find.png")}
 
-# Notifications
-NOTIFICATION_ICON_PATH = os.path.join(IMAGES_PATH, "logo.png")
-NOTIFICATION_SOUND_PATH = os.path.join(FILES_PATH, "notification.wav")
+# Map
+MAP_TITLE = "IP Map"
+MAP_GEOMETRY = "960x540+580+370"

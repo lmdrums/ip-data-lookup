@@ -1,6 +1,7 @@
 from customtkinter import (CTk, CTkLabel, CTkFrame, CTkEntry, CTkButton, CTkOptionMenu,
-                           CTkCheckBox, StringVar, CTkImage, CTkScrollableFrame,
+                           CTkCheckBox, StringVar, CTkImage, CTkScrollableFrame, CTkToplevel,
                            set_appearance_mode, set_default_color_theme)
+import tkintermapview
 import utils.settings as s
 import ip_data_lookup.constants as c
 import sys
@@ -224,6 +225,10 @@ class App(CTk):
                     self.labels.append(self.label2)
                     row += 1
 
+            self.show_map_button = CTkButton(self.home_frame, text="Show on Map", command=self.show_map)
+            self.show_map_button.grid(row=row, column=0, padx=(10,0), pady=(10,0), sticky="w")
+            self.labels.append(self.show_map_button)
+
     def check_valid_ip(self):
         ip = self.ip_search_box.get()
         if not ip or '.' not in ip or len(ip.split('.')) != 4:
@@ -236,6 +241,30 @@ class App(CTk):
                 return
 
         self.ip_search_box.configure(border_color=("#979DA2", "#565B5E"))
+    
+    def show_map(self):
+        map_class = Map(self.ip_search_box.get())
+        map_class.mainloop()
+
+class Map(CTkToplevel):
+    def __init__(self, ip: str):
+        super().__init__()
+        self.ip = ip
+        self.title(c.MAP_TITLE)
+        self.after(250, lambda: self.iconbitmap(get_resource_path(c.WINDOW_ICON_PATH)))
+        self.geometry(c.MAP_GEOMETRY)
+
+        data = get(f"http://ip-api.com/json/{ip}").json()
+        latitude = data["lat"]
+        longitude = data["lon"]
+
+        self.map = tkintermapview.TkinterMapView(self, corner_radius=0)
+        self.map.pack(fill="both", expand=True)
+        self.map.set_position(latitude, longitude)
+        self.map.set_zoom(13)
+        self.map.set_marker(latitude, longitude)
+
+        self.after(200, self.lift)
 
 def main():
     app = App()
