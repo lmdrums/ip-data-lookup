@@ -8,6 +8,7 @@ from PIL import Image, ImageTk
 from utils.path import get_resource_path
 from customtkinter.windows.widgets.appearance_mode import AppearanceModeTracker
 from requests import get
+from tkinter import messagebox
 
 set_appearance_mode("system")
 set_default_color_theme(c.THEME_PATH)
@@ -32,11 +33,15 @@ class App(CTk):
 
         """Navigation Section"""
 
+        tk_image = self.get_banner_image()
+
+        self.ip_logo = CTkLabel(self.navigation_frame, text="", image=tk_image)
+        self.ip_logo.grid(row=0, column=0, sticky="w")
+
         self.home_button = CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Home",
                                                    fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
                                                    anchor="w", command=self.home_button_event)
         self.home_button.grid(row=1, column=0, sticky="ew")
-
 
         self.settings_button = CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Settings",
                                                       fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
@@ -51,19 +56,14 @@ class App(CTk):
         self.labels = []
         self.home_frame = CTkScrollableFrame(self, corner_radius=0, fg_color="transparent")
         self.home_frame.grid_columnconfigure(0, weight=1)
+        self.home_frame.grid_columnconfigure(1, weight=20)
 
-        self.ip_search_box = CTkEntry(self.home_frame, placeholder_text="Enter IP (1.1.1.1)", border_width=1.5,
+        public_ip = get("https://checkip.amazonaws.com/").text
+        self.ip_search_box = CTkEntry(self.home_frame, placeholder_text=f"Enter IP ({public_ip})", border_width=1.5,
                                       justify="center", corner_radius=18, height=35, width=180)
-        self.ip_search_box.grid(row=0, column=0, padx=(10,0), pady=(10,0))
+        self.ip_search_box.grid(row=0, column=0, padx=(10,0), pady=10, sticky="w")
         self.ip_search_box.bind("<Return>", lambda _: self.change_ip_info())
-
-        self.search_button = CTkButton(self.home_frame, text="Search", command=self.change_ip_info)
-        self.search_button.grid(row=0, column=0, padx=(10, 0), pady=(10, 0), sticky="e")
-
-        tk_image = self.get_banner_image()
-
-        self.ip_logo = CTkLabel(self.home_frame, text="", image=tk_image)
-        self.ip_logo.grid(row=0, column=0, sticky="w")
+        self.ip_search_box.bind("<KeyRelease>", lambda _: self.check_valid_ip())
 
         """Settings Section"""
 
@@ -128,6 +128,7 @@ class App(CTk):
         self.as_tick = CTkCheckBox(self.settings_frame, text="Autonomous System (AS)", variable=self.as_variable, onvalue="on", offvalue="off", command=self.change_settings)
         self.as_tick.grid(row=12, column=0, padx=(10,0), pady=(10,0), sticky="w")
         
+        self.load_settings()
         self.select_frame_by_name("home")
 
     def change_settings(self):
@@ -176,10 +177,10 @@ class App(CTk):
 
     def home_button_event(self):
         self.select_frame_by_name("home")
+        self.change_ip_info()
 
     def settings_button_event(self):
         self.select_frame_by_name("settings")
-        self.load_settings()
 
     def change_appearance_mode(self, mode):
         set_appearance_mode(mode)
@@ -210,10 +211,31 @@ class App(CTk):
             data = get(f"http://ip-api.com/json/{ip}").json()
             for setting in self.true_settings:
                 label_heading = c.SETTINGS_DICT_LABELS[setting]
-                self.label = CTkLabel(self.home_frame, text=f"{label_heading} {data[setting]}")
-                self.label.grid(row=row, column=0, sticky="w")
-                self.labels.append(self.label)
-                row += 1
+                try:
+                    self.label = CTkLabel(self.home_frame, text=f"{label_heading} ", font=("Segoe UI", 13, "bold"))
+                    self.label2 = CTkLabel(self.home_frame, text=data[setting])
+                except KeyError:
+                    messagebox.showerror("Error", "Please enter a valid Public IP address")
+                    return
+                else:
+                    self.label.grid(row=row, column=0, padx=(10,0), sticky="w")
+                    self.label2.grid(row=row, column=1, padx=(10,0), sticky="w")
+                    self.labels.append(self.label)
+                    self.labels.append(self.label2)
+                    row += 1
+
+    def check_valid_ip(self):
+        ip = self.ip_search_box.get()
+        if not ip or '.' not in ip or len(ip.split('.')) != 4:
+            self.ip_search_box.configure(border_color="red")
+            return
+
+        for part in ip.split('.'):
+            if not part.isdigit() or int(part) > 255:
+                self.ip_search_box.configure(border_color="red")
+                return
+
+        self.ip_search_box.configure(border_color=("#979DA2", "#565B5E"))
 
 def main():
     app = App()
