@@ -62,8 +62,8 @@ SETTINGS_DICT_LABELS = {
 # Images
 BANNER_IMAGE = os.path.join(IMAGES_PATH, "banner.png")
 BANNER_IMAGE_DARK = os.path.join(IMAGES_PATH, "banner_dark.png")
-FIND_IMAGE = {"light": os.path.join(IMAGES_PATH, "find.png"),
-                       "dark": os.path.join(IMAGES_PATH, "find.png")}
+LOGO_CTK_IMAGE = os.path.join(IMAGES_PATH, "globe_logo.png")
+SETTINGS_IMAGE = os.path.join(IMAGES_PATH, "settings.png")
 
 # Map
 MAP_TITLE = "IP Map"

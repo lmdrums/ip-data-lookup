@@ -1,20 +1,27 @@
 from customtkinter import (CTk, CTkLabel, CTkFrame, CTkEntry, CTkButton, CTkOptionMenu,
                            CTkCheckBox, StringVar, CTkImage, CTkScrollableFrame, CTkToplevel,
                            set_appearance_mode, set_default_color_theme)
-import tkintermapview
-import utils.settings as s
-import ip_data_lookup.constants as c
-import sys
-from PIL import Image, ImageTk
-from utils.path import get_resource_path
 from customtkinter.windows.widgets.appearance_mode import AppearanceModeTracker
+from PIL import Image, ImageTk
+import tkintermapview
+
+import sys
 from requests import get
 from tkinter import messagebox
+
+from utils.path import get_resource_path
+import utils.settings as s
+import ip_data_lookup.constants as c
 
 set_appearance_mode("system")
 set_default_color_theme(c.THEME_PATH)
 
 get_pillow_image = lambda relative_path: Image.open(get_resource_path(relative_path))
+
+globe_image = CTkImage(light_image=get_pillow_image(c.LOGO_CTK_IMAGE),
+                dark_image=get_pillow_image(c.LOGO_CTK_IMAGE))
+settings_image = CTkImage(light_image=get_pillow_image(c.SETTINGS_IMAGE),
+                dark_image=get_pillow_image(c.SETTINGS_IMAGE))
 
 class App(CTk):
     def __init__(self):
@@ -41,12 +48,12 @@ class App(CTk):
 
         self.home_button = CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Home",
                                                    fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
-                                                   anchor="w", command=self.home_button_event)
+                                                   anchor="w", command=self.home_button_event, image=globe_image)
         self.home_button.grid(row=1, column=0, sticky="ew")
 
         self.settings_button = CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Settings",
                                                       fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
-                                                      anchor="w", command=self.settings_button_event)
+                                                      anchor="w", command=self.settings_button_event, image=settings_image)
         self.settings_button.grid(row=2, column=0, sticky="ew")
 
         self.appearance_mode_menu = CTkOptionMenu(self.navigation_frame, values=["System", "Light", "Dark"], command=self.change_appearance_mode)

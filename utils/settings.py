@@ -1,5 +1,6 @@
 from configparser import RawConfigParser, NoSectionError, NoOptionError
 import os
+from pathlib import Path
 
 import ip_data_lookup.constants as c
 from utils.path import get_resource_path
@@ -60,6 +61,13 @@ def make_default_settings_file(settings: dict[str, dict[str, str | int | float |
 
     for section, section_settings in settings.items():
         config[section] = section_settings
-
-    with open(SETTINGS_INI_PATH, "w", encoding="utf-8") as file:
-        config.write(file)
+    
+    while True:
+        try:
+            with open(SETTINGS_INI_PATH, "w", encoding="utf-8") as file:
+                config.write(file)
+        # If any parent directories don't exist, make them
+        except FileNotFoundError:
+            os.makedirs(Path(SETTINGS_INI_PATH).parent)
+        else:
+            break
