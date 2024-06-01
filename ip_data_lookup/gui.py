@@ -67,12 +67,13 @@ class App(CTk):
         self.home_frame.grid_columnconfigure(1, weight=20)
 
         public_ip = get("https://checkip.amazonaws.com/").text
-        self.ip_search_box = CTkEntry(self.home_frame, placeholder_text=f"Enter IP ({public_ip})", border_width=1.5,
-                                      justify="center", corner_radius=18, height=35, width=180)
-        self.ip_search_box.grid(row=0, column=0, padx=(10,0), pady=10, sticky="w")
+        self.ip_search_box = CTkEntry(self.home_frame, placeholder_text=public_ip, border_width=1.5,
+                                      justify="center", corner_radius=18, height=35, width=130)
+        self.ip_search_box.grid(row=0, column=0, pady=10, columnspan=2)
+        self.ip_search_box.bind("<1>", lambda _: self.in_focus())
         self.ip_search_box.bind("<Return>", lambda _: self.change_ip_info())
         self.ip_search_box.bind("<KeyRelease>", lambda _: self.check_valid_ip())
-
+        
         """Settings Section"""
 
         self.true_settings = []
@@ -138,6 +139,14 @@ class App(CTk):
         
         self.load_settings()
         self.select_frame_by_name("home")
+
+    def in_focus(self):
+        """Adds animation to widget"""
+        target = 300
+        width = self.ip_search_box.cget("width")
+        if width < target:
+            self.ip_search_box.configure(width=width + 1)
+            self.after(1, self.in_focus)
 
     def change_settings(self):
         self.change_settings_dict = {
