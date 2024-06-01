@@ -5,4 +5,4 @@
 #|______/   |__| |__|____/____  >
 #                             \/ 
 
-# Thank you to aritra-codes for developing these files
+# Thank you to aritra-codes for developing these scripts

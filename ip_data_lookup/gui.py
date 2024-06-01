@@ -6,8 +6,10 @@ from PIL import Image, ImageTk
 import tkintermapview
 
 import sys
+from subprocess import Popen, PIPE
 from requests import get
-from tkinter import messagebox
+from tkinter import messagebox, scrolledtext
+import threading
 
 from utils.path import get_resource_path
 import utils.settings as s
@@ -51,10 +53,15 @@ class App(CTk):
                                                    anchor="w", command=self.home_button_event, image=globe_image)
         self.home_button.grid(row=1, column=0, sticky="ew")
 
+        self.tracert_button = CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Traceroute",
+                                                   fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
+                                                   anchor="w", command=self.tracert_button_event, image=globe_image)
+        self.tracert_button.grid(row=2, column=0, sticky="ew")
+
         self.settings_button = CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Settings",
                                                       fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
                                                       anchor="w", command=self.settings_button_event, image=settings_image)
-        self.settings_button.grid(row=2, column=0, sticky="ew")
+        self.settings_button.grid(row=3, column=0, sticky="ew")
 
         self.appearance_mode_menu = CTkOptionMenu(self.navigation_frame, values=["System", "Light", "Dark"], command=self.change_appearance_mode)
         self.appearance_mode_menu.grid(row=6, column=0, padx=20, pady=20, sticky="s")
@@ -70,9 +77,25 @@ class App(CTk):
         self.ip_search_box = CTkEntry(self.home_frame, placeholder_text=public_ip, border_width=1.5,
                                       justify="center", corner_radius=18, height=35, width=130)
         self.ip_search_box.grid(row=0, column=0, pady=10, columnspan=2)
-        self.ip_search_box.bind("<1>", lambda _: self.in_focus())
+        self.ip_search_box.bind("<1>", lambda _: self.in_focus(self.ip_search_box, 300))
         self.ip_search_box.bind("<Return>", lambda _: self.change_ip_info())
         self.ip_search_box.bind("<KeyRelease>", lambda _: self.check_valid_ip())
+
+        """Traceroute Section"""
+
+        self.tracert_frame = CTkScrollableFrame(self, corner_radius=0, fg_color="transparent")
+        #self.tracert_frame.grid_columnconfigure(0, weight=1)
+
+        self.enter_hostname = CTkEntry(self.tracert_frame, placeholder_text="Enter Hostname", border_width=1.5,
+                                      justify="center", corner_radius=18, height=35, width=130)
+        self.enter_hostname.pack(pady=10)
+        self.enter_hostname.bind("<1>", lambda _: self.in_focus(self.enter_hostname, 300))
+        self.enter_hostname.bind("<Return>", lambda _: self.tracert_function())
+
+        self.tracert_output = scrolledtext.ScrolledText(self.tracert_frame, bd=1,
+                                                      font=("Consolas", 9), height=30)
+        self.tracert_output.pack(pady=20, padx=20, expand=True, fill="both")
+        self.tracert_output.configure(state="disabled")
         
         """Settings Section"""
 
@@ -140,13 +163,32 @@ class App(CTk):
         self.load_settings()
         self.select_frame_by_name("home")
 
-    def in_focus(self):
+    def tracert(self, hostname):
+        if sys.platform.startswith("win"):
+            p = Popen(f"cmd /c tracert {hostname}", shell=True, stdout=PIPE, encoding='utf-8')
+        else:
+            p = Popen([f"tracert {hostname}"], shell=True, stdout=PIPE, encoding="utf-8")
+        self.tracert_output.config(state="normal")
+        self.tracert_output.delete(1.0, "end")
+        for line in p.stdout:
+            self.tracert_output.insert("end", line.rstrip("\n")+"\n")
+        self.tracert_output.config(state="disabled")
+
+    def tracert_function(self):
+        def run():
+            hostname = self.enter_hostname.get()
+            self.tracert_output.insert("end", "Running...\n")
+            self.tracert(hostname)
+
+        thread = threading.Thread(target=run)
+        thread.start()
+        
+    def in_focus(self, widget, target: int):
         """Adds animation to widget"""
-        target = 300
-        width = self.ip_search_box.cget("width")
+        width = widget.cget("width")
         if width < target:
-            self.ip_search_box.configure(width=width + 1)
-            self.after(1, self.in_focus)
+            widget.configure(width=width + 1)
+            self.after(1, self.in_focus, widget, 300)
 
     def change_settings(self):
         self.change_settings_dict = {
@@ -181,12 +223,17 @@ class App(CTk):
             
     def select_frame_by_name(self, name):
         self.home_button.configure(fg_color=("gray75", "gray25") if name == "home" else "transparent")
+        self.tracert_button.configure(fg_color=("gray75", "gray25") if name == "tracert" else "transparent")
         self.settings_button.configure(fg_color=("gray75", "gray25") if name == "settings" else "transparent")
 
         if name == "home":
             self.home_frame.grid(row=0, column=1, sticky="nsew")
         else:
             self.home_frame.grid_forget()
+        if name == "tracert":
+            self.tracert_frame.grid(row=0, column=1, sticky="nsew")
+        else:
+            self.tracert_frame.grid_forget()
         if name == "settings":
             self.settings_frame.grid(row=0, column=1, sticky="nsew")
         else:
@@ -195,6 +242,9 @@ class App(CTk):
     def home_button_event(self):
         self.select_frame_by_name("home")
         self.change_ip_info()
+    
+    def tracert_button_event(self):
+        self.select_frame_by_name("tracert")
 
     def settings_button_event(self):
         self.select_frame_by_name("settings")
