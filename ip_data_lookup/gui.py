@@ -205,9 +205,12 @@ class App(CTk):
         for line in p.stdout:
             self.tracert_output.insert("end", line.rstrip("\n")+"\n")
         self.tracert_output.insert("end", "\nCompleted successfully!")
+        self.enter_hostname.configure(state="enabled")
         self.tracert_output.config(state="disabled")
 
     def tracert_function(self):
+        self.tracert_output.delete(1.0, "end")
+        self.enter_hostname.configure(state="disabled")
         def run():
             hostname = self.enter_hostname.get()
             try:
