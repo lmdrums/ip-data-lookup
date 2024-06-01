@@ -196,21 +196,26 @@ class App(CTk):
 
     def tracert(self, hostname):
         if sys.platform.startswith("win"):
-            p = Popen(f"cmd /c tracert {hostname}", shell=True, stdout=PIPE, encoding='utf-8')
+            tracert = Popen(f"cmd /c tracert {hostname}", shell=True, stdout=PIPE, encoding='utf-8')
         else:
-            p = Popen([f"traceroute {hostname}"], shell=True, stdout=PIPE, encoding="utf-8")
+            tracert = Popen([f"traceroute {hostname}"], shell=True, stdout=PIPE, encoding="utf-8")
         self.tracert_output.config(state="normal")
         self.tracert_output.delete(1.0, "end")
         self.tracert_output.insert("end", "Running...\n\n")
-        for line in p.stdout:
+        for line in tracert.stdout:
             self.tracert_output.insert("end", line.rstrip("\n")+"\n")
+            if "unable" in line.lower():
+                self.tracert_output.insert("end", "\nCompleted with errors.")
+                self.enter_hostname.bind("<Return>", lambda _: self.tracert_function())
+                return
+        
         self.tracert_output.insert("end", "\nCompleted successfully!")
-        self.enter_hostname.configure(state="enabled")
+        self.enter_hostname.bind("<Return>", lambda _: self.tracert_function())
         self.tracert_output.config(state="disabled")
 
     def tracert_function(self):
         self.tracert_output.delete(1.0, "end")
-        self.enter_hostname.configure(state="disabled")
+        self.enter_hostname.unbind("<Return>", None)
         def run():
             hostname = self.enter_hostname.get()
             try:
