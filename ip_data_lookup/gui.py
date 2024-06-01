@@ -30,10 +30,10 @@ class App(CTk):
         super().__init__()
 
         if sys.platform.startswith("win"):
-            self.title(c.MAIN_TITLE)
+            self.iconbitmap(c.WINDOW_ICON_PATH)
+        self.title(c.MAIN_TITLE)
         self.geometry(c.MAIN_GEOMETRY)
-        self.iconbitmap(c.WINDOW_ICON_PATH)
-
+        
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
@@ -93,7 +93,7 @@ class App(CTk):
         self.enter_hostname.bind("<Return>", lambda _: self.tracert_function())
 
         self.tracert_output = scrolledtext.ScrolledText(self.tracert_frame, bd=1,
-                                                      font=("Consolas", 9), height=30)
+                                                      font=("Consolas", 9), height=25)
         self.tracert_output.pack(pady=20, padx=20, expand=True, fill="both")
         self.tracert_output.configure(state="disabled")
         
@@ -167,18 +167,22 @@ class App(CTk):
         if sys.platform.startswith("win"):
             p = Popen(f"cmd /c tracert {hostname}", shell=True, stdout=PIPE, encoding='utf-8')
         else:
-            p = Popen([f"tracert {hostname}"], shell=True, stdout=PIPE, encoding="utf-8")
+            p = Popen([f"traceroute {hostname}"], shell=True, stdout=PIPE, encoding="utf-8")
         self.tracert_output.config(state="normal")
         self.tracert_output.delete(1.0, "end")
+        self.tracert_output.insert("end", "Running...\n\n")
         for line in p.stdout:
             self.tracert_output.insert("end", line.rstrip("\n")+"\n")
+        self.tracert_output.insert("end", "\nCompleted successfully!")
         self.tracert_output.config(state="disabled")
 
     def tracert_function(self):
         def run():
             hostname = self.enter_hostname.get()
-            self.tracert_output.insert("end", "Running...\n")
-            self.tracert(hostname)
+            try:
+                self.tracert(hostname)
+            except Exception:
+                messagebox.showerror("Error", "An error occured whilst completing the traceroute.")
 
         thread = threading.Thread(target=run)
         thread.start()
@@ -317,7 +321,8 @@ class Map(CTkToplevel):
         super().__init__()
         self.ip = ip
         self.title(c.MAP_TITLE)
-        self.after(250, lambda: self.iconbitmap(get_resource_path(c.WINDOW_ICON_PATH)))
+        if sys.platform.startswith("win"):
+            self.after(250, lambda: self.iconbitmap(get_resource_path(c.WINDOW_ICON_PATH)))
         self.geometry(c.MAP_GEOMETRY)
 
         data = get(f"http://ip-api.com/json/{ip}").json()
