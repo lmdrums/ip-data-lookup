@@ -48,22 +48,26 @@ class App(CTk):
         self.ip_logo = CTkLabel(self.navigation_frame, text="", image=tk_image)
         self.ip_logo.grid(row=0, column=0, sticky="w")
 
-        self.home_button = CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Home",
-                                                   fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
-                                                   anchor="w", command=self.home_button_event, image=globe_image)
+        self.home_button = CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10,
+                                     text="Home",fg_color="transparent", text_color=("gray10", "gray90"),
+                                     hover_color=("gray70", "gray30"),anchor="w", 
+                                     command=self.home_button_event, image=globe_image)
         self.home_button.grid(row=1, column=0, sticky="ew")
 
-        self.tracert_button = CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Traceroute",
-                                                   fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
-                                                   anchor="w", command=self.tracert_button_event, image=globe_image)
+        self.tracert_button = CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10,
+                                        text="Traceroute", fg_color="transparent", text_color=("gray10", "gray90"),
+                                        hover_color=("gray70", "gray30"), anchor="w",
+                                        command=self.tracert_button_event, image=globe_image)
         self.tracert_button.grid(row=2, column=0, sticky="ew")
 
-        self.settings_button = CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Settings",
-                                                      fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
-                                                      anchor="w", command=self.settings_button_event, image=settings_image)
+        self.settings_button = CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10,
+                                         text="Settings", fg_color="transparent", text_color=("gray10", "gray90"),
+                                         hover_color=("gray70", "gray30"), anchor="w",
+                                         command=self.settings_button_event, image=settings_image)
         self.settings_button.grid(row=3, column=0, sticky="ew")
 
-        self.appearance_mode_menu = CTkOptionMenu(self.navigation_frame, values=["System", "Light", "Dark"], command=self.change_appearance_mode)
+        self.appearance_mode_menu = CTkOptionMenu(self.navigation_frame,values=["System", "Light", "Dark"],
+                                                  command=self.change_appearance_mode)
         self.appearance_mode_menu.grid(row=6, column=0, padx=20, pady=20, sticky="s")
 
         """Home Section"""
@@ -74,8 +78,9 @@ class App(CTk):
         self.home_frame.grid_columnconfigure(1, weight=20)
 
         public_ip = get("https://checkip.amazonaws.com/").text
-        self.ip_search_box = CTkEntry(self.home_frame, placeholder_text=public_ip, border_width=1.5,
-                                      justify="center", corner_radius=18, height=35, width=130)
+        self.ip_search_box = CTkEntry(self.home_frame, placeholder_text=public_ip,
+                                      border_width=1.5,justify="center",
+                                      corner_radius=18, height=35, width=130)
         self.ip_search_box.grid(row=0, column=0, pady=10, columnspan=2)
         self.ip_search_box.bind("<1>", lambda _: self.in_focus(self.ip_search_box, 300))
         self.ip_search_box.bind("<Return>", lambda _: self.change_ip_info())
@@ -86,14 +91,15 @@ class App(CTk):
         self.tracert_frame = CTkScrollableFrame(self, corner_radius=0, fg_color="transparent")
         #self.tracert_frame.grid_columnconfigure(0, weight=1)
 
-        self.enter_hostname = CTkEntry(self.tracert_frame, placeholder_text="Enter Hostname", border_width=1.5,
-                                      justify="center", corner_radius=18, height=35, width=130)
+        self.enter_hostname = CTkEntry(self.tracert_frame, placeholder_text="Enter Hostname",
+                                       border_width=1.5, justify="center",
+                                       corner_radius=18, height=35, width=130)
         self.enter_hostname.pack(pady=10)
         self.enter_hostname.bind("<1>", lambda _: self.in_focus(self.enter_hostname, 300))
         self.enter_hostname.bind("<Return>", lambda _: self.tracert_function())
 
         self.tracert_output = scrolledtext.ScrolledText(self.tracert_frame, bd=1,
-                                                      font=("Consolas", 9), height=25)
+                                                      font=("Consolas", 9), height=30)
         self.tracert_output.pack(pady=20, padx=20, expand=True, fill="both")
         self.tracert_output.configure(state="disabled")
         
@@ -103,7 +109,8 @@ class App(CTk):
         self.settings_frame = CTkFrame(self, corner_radius=0, fg_color="transparent")
         self.settings_frame.grid_columnconfigure(0, weight=1)
 
-        self.settings_label = CTkLabel(self.settings_frame, text="Select all information you would like to appear:",
+        self.settings_label = CTkLabel(self.settings_frame,
+                                       text="Select all information you would like to appear:",
                                        font=("Segoe UI", 16, "bold"))
         self.settings_label.grid(row=0, column=0, padx=(10,0), pady=(10,0), sticky="w")
 
@@ -135,29 +142,53 @@ class App(CTk):
             c.AS_SETTING_LOCATOR: self.as_variable,
         }
 
-        self.country_tick = CTkCheckBox(self.settings_frame, text="Country", variable=self.country_variable, onvalue="on", offvalue="off", command=self.change_settings)
+        self.country_tick = CTkCheckBox(self.settings_frame, text="Country", 
+                                        variable=self.country_variable, onvalue="on",
+                                        offvalue="off", command=self.change_settings)
         self.country_tick.grid(row=1, column=0, padx=(10,0), pady=(10,0), sticky="w")
-        self.country_code_tick = CTkCheckBox(self.settings_frame, text="Country Code", variable=self.country_code_variable, onvalue="on", offvalue="off", command=self.change_settings)
+        self.country_code_tick = CTkCheckBox(self.settings_frame, text="Country Code",
+                                             variable=self.country_code_variable, onvalue="on",
+                                             offvalue="off", command=self.change_settings)
         self.country_code_tick.grid(row=2, column=0, padx=(10,0), pady=(10,0), sticky="w")
-        self.region_tick = CTkCheckBox(self.settings_frame, text="Region", onvalue="on", variable=self.region_variable, offvalue="off", command=self.change_settings)
+        self.region_tick = CTkCheckBox(self.settings_frame, text="Region", onvalue="on",
+                                       variable=self.region_variable,
+                                       offvalue="off", command=self.change_settings)
         self.region_tick.grid(row=3, column=0, padx=(10,0), pady=(10,0), sticky="w")
-        self.region_name_tick = CTkCheckBox(self.settings_frame, text="Region Name", variable=self.region_name_variable, onvalue="on", offvalue="off", command=self.change_settings)
+        self.region_name_tick = CTkCheckBox(self.settings_frame, text="Region Name",
+                                            variable=self.region_name_variable, onvalue="on",
+                                            offvalue="off", command=self.change_settings)
         self.region_name_tick.grid(row=4, column=0, padx=(10,0), pady=(10,0), sticky="w")
-        self.city_tick = CTkCheckBox(self.settings_frame, text="City", onvalue="on", variable=self.city_variable, offvalue="off", command=self.change_settings)
+        self.city_tick = CTkCheckBox(self.settings_frame, text="City", onvalue="on",
+                                     variable=self.city_variable,
+                                     offvalue="off", command=self.change_settings)
         self.city_tick.grid(row=5, column=0, padx=(10,0), pady=(10,0), sticky="w")
-        self.zip_tick = CTkCheckBox(self.settings_frame, text="ZIP/Post Code", variable=self.zip_code_variable, onvalue="on", offvalue="off", command=self.change_settings)
+        self.zip_tick = CTkCheckBox(self.settings_frame, text="ZIP/Post Code",
+                                    variable=self.zip_code_variable, onvalue="on",
+                                    offvalue="off", command=self.change_settings)
         self.zip_tick.grid(row=6, column=0, padx=(10,0), pady=(10,0), sticky="w")
-        self.latitude_tick = CTkCheckBox(self.settings_frame, text="Latitude", variable=self.latitude_variable, onvalue="on", offvalue="off", command=self.change_settings)
+        self.latitude_tick = CTkCheckBox(self.settings_frame, text="Latitude",
+                                         variable=self.latitude_variable, onvalue="on",
+                                         offvalue="off", command=self.change_settings)
         self.latitude_tick.grid(row=7, column=0, padx=(10,0), pady=(10,0), sticky="w")
-        self.longitude_tick = CTkCheckBox(self.settings_frame, text="Longitude", variable=self.longitude_variable, onvalue="on", offvalue="off", command=self.change_settings)
+        self.longitude_tick = CTkCheckBox(self.settings_frame, text="Longitude",
+                                          variable=self.longitude_variable, onvalue="on",
+                                          offvalue="off", command=self.change_settings)
         self.longitude_tick.grid(row=8, column=0, padx=(10,0), pady=(10,0), sticky="w")
-        self.timezone_tick = CTkCheckBox(self.settings_frame, text="Timezone", variable=self.timezone_variable, onvalue="on", offvalue="off", command=self.change_settings)
+        self.timezone_tick = CTkCheckBox(self.settings_frame, text="Timezone",
+                                         variable=self.timezone_variable, onvalue="on",
+                                         offvalue="off", command=self.change_settings)
         self.timezone_tick.grid(row=9, column=0, padx=(10,0), pady=(10,0), sticky="w")
-        self.isp_tick = CTkCheckBox(self.settings_frame, text="Internet Service Provider (ISP)", variable=self.isp_variable, onvalue="on", offvalue="off", command=self.change_settings)
+        self.isp_tick = CTkCheckBox(self.settings_frame, text="Internet Service Provider (ISP)",
+                                    variable=self.isp_variable, onvalue="on",
+                                    offvalue="off", command=self.change_settings)
         self.isp_tick.grid(row=10, column=0, padx=(10,0), pady=(10,0), sticky="w")
-        self.org_tick = CTkCheckBox(self.settings_frame, text="Organisation (Org)", variable=self.org_variable, onvalue="on", offvalue="off", command=self.change_settings)
+        self.org_tick = CTkCheckBox(self.settings_frame, text="Organisation (Org)",
+                                    variable=self.org_variable, onvalue="on",
+                                    offvalue="off", command=self.change_settings)
         self.org_tick.grid(row=11, column=0, padx=(10,0), pady=(10,0), sticky="w")
-        self.as_tick = CTkCheckBox(self.settings_frame, text="Autonomous System (AS)", variable=self.as_variable, onvalue="on", offvalue="off", command=self.change_settings)
+        self.as_tick = CTkCheckBox(self.settings_frame, text="Autonomous System (AS)",
+                                   variable=self.as_variable, onvalue="on",
+                                   offvalue="off", command=self.change_settings)
         self.as_tick.grid(row=12, column=0, padx=(10,0), pady=(10,0), sticky="w")
         
         self.load_settings()
@@ -183,7 +214,6 @@ class App(CTk):
                 self.tracert(hostname)
             except Exception:
                 messagebox.showerror("Error", "An error occured whilst completing the traceroute.")
-
         thread = threading.Thread(target=run)
         thread.start()
         
@@ -226,9 +256,12 @@ class App(CTk):
                 self.true_settings.append(locator[1])
             
     def select_frame_by_name(self, name):
-        self.home_button.configure(fg_color=("gray75", "gray25") if name == "home" else "transparent")
-        self.tracert_button.configure(fg_color=("gray75", "gray25") if name == "tracert" else "transparent")
-        self.settings_button.configure(fg_color=("gray75", "gray25") if name == "settings" else "transparent")
+        self.home_button.configure(fg_color=("gray75", "gray25")
+                                   if name == "home" else "transparent")
+        self.tracert_button.configure(fg_color=("gray75", "gray25")
+                                      if name == "tracert" else "transparent")
+        self.settings_button.configure(fg_color=("gray75", "gray25")
+                                       if name == "settings" else "transparent")
 
         if name == "home":
             self.home_frame.grid(row=0, column=1, sticky="nsew")
